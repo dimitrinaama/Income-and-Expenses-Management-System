@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Income and Expenses Management System - Login</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+
+  <!-- favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.jpg">
+
+</head>
+
+<body class="bg-light">
+
+  <div class="container">
+
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+
+      <div class="col-xl-10 col-lg-12 col-md-9">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+          <div class="card-body p-0">
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+              <div class="col-lg-6 d-none d-lg-block">
+                <div class="p-5">
+                  <img src="images/login.jpg" class="img-fluid" alt="Responsive image">
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="p-5">
+                  <div class="text-center">
+                    <h2 class="font-weight-bold">Account Login</h2>
+                  </div>
+                  <span class="text-center" id="error_message"></span>
+                  <hr class="my-4">
+                  <body>
+                    <div class="wrapper">
+                      <form id="user_form" class="login">
+                        <div class="form-group">
+                          <input type="text" class="form-control" id="email" name="email" maxlength="50" placeholder="Email">
+                          <div class="text-danger" id="email_error_message"></div>
+                        </div>
+                        <div class="form-group">
+                          <input type="password" class="form-control" id="password" name="password" maxlength="50" placeholder="Password">
+                          <div class="text-danger" id="password_error_message"></div>
+                        </div>
+                        <input type="submit" name="admin_login" id="admin_login" class="btn btn-primary btn-block" value="Login"/>
+                      </form>
+                    </div>
+                  </body>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="vendor/jquery/jquery.min.js"></script>
+
+</body>
+
+</html>
+<script>
+
+  $('#user_form').on('submit', function (e) {
+    event.preventDefault();
+    login();
+  });
+
+  $(document).keypress(function(e) {
+    if(e.which == 13) {
+      login();
+    }
+  });
+
+  var error_email = false;
+  var error_password = false;
+
+  $("#email").focusout(function () {
+    checkEmail();
+  });
+
+  $("#password").focusout(function () {
+    checkPassword();
+  });
+
+  // Validate email field.
+  function checkEmail() {
+    var pattern = new RegExp(/^[+a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i);
+    var email_length = $("#email").val().length;
+
+    if ($.trim($('#email').val()) == '') {
+      $("#email_error_message").html("Please enter your email.");
+      $("#email_error_message").show();
+    } else if (!(pattern.test($("#email").val()))) {
+      $("#email_error_message").html("Invalid email address.");
+      $("#email_error_message").show();
+      error_email = true;
+    } else {
+      $("#email_error_message").hide();
+    }
+  }
+
+  // Validate password field.
+  function checkPassword() {
+    var password_length = $("#password").val().length;
+    if ($.trim($('#password').val()) == '') {
+      $("#password_error_message").html("Please enter your password.");
+      $("#password_error_message").show();
+      error_password = true;
+    }
+    else {
+      $("#password_error_message").hide();
+    }
+  }
+
+  function login() {
+    error_email = false;
+    error_password = false;
+
+    checkEmail();
+    checkPassword();
+
+    if (error_email == false && error_password == false) {
+      $.ajax({
+        type: "POST",
+        data: $('#user_form').serialize(),
+        url: "check_login.php",
+        dataType: "json",
+        beforeSend:function(){
+          $('#admin_login').val('Please wait...');
+          $('#admin_login').attr('disabled', 'disabled');
+          $('#error_message').hide();
+        },
+        success: function (data) {
+          if (data.status == 'inactive') {
+            $('#error_message').show();
+            $('#error_message').html('<div class="alert alert-danger">'+data.message+'</div>');
+            $('#admin_login').val('Login');
+            $('#admin_login').attr('disabled', false);
+          } else if (data.status == 'success') {
+              window.location = "index.php";
+          } else if (data.status == 'error') {
+            $('#error_message').show();
+            $('#error_message').html('<div class="alert alert-danger">'+data.message+'</div>');
+            $('#admin_login').val('Save');
+            $('#admin_login').attr('disabled', false);
+          }
+        },
+        error: function () {
+          alert("Oops..! Something went wrong.");
+          $('#admin_login').val('Save');
+          $('#admin_login').attr('disabled', false);
+        }
+      });
+    }
+  }
+
+</script>
